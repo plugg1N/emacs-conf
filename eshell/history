@@ -1,0 +1,9 @@
+clear
+dir
+clear
+python3 a.pt
+python3 a.py 
+clear 
+fastfetch 
+echo HELLO1.ASM 
+clear
