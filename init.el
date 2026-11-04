@@ -300,7 +300,7 @@
 (defun my/open-cheat-sheet ()
   "Открыть файл-шпаргалку по Emacs."
   (interactive)
-  (find-file-other-window "~/EMACS_CHEAT_SHEET.md"))
+  (find-file-other-window (expand-file-name "CHEAT_SHEET.md" user-emacs-directory)))
 
 (global-set-key (kbd "C-c h") 'my/open-cheat-sheet)
 

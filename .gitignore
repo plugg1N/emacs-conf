@@ -1,0 +1,19 @@
+# Emacs cache and local state
+eln-cache/
+elpa/
+auto-save-list/
+backups/
+auto-saves/
+eshell/
+history
+places
+recentf
+server/
+tramp/
+url/
+
+# Temporary and backup files
+*~
+\#*\#
+.\#*
+.saves-*
