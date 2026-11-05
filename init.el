@@ -81,6 +81,10 @@
 ;; Автоматическое закрытие скобок и кавычек
 (electric-pair-mode 1)
 
+;; Настройки табуляции и отступов: 2 пробела вместо табуляции
+(setq-default indent-tabs-mode nil)  ; использовать пробелы вместо табов
+(setq-default tab-width 2)           ; ширина таба 2 пробела
+
 ;; Хранение резервных копий (backup files ~) в одной папке, чтобы не мусорить в проектах
 (setq backup-directory-alist `(("." . ,(expand-file-name "backups" user-emacs-directory)))
       auto-save-file-name-transforms `((".*" ,(expand-file-name "auto-saves" user-emacs-directory) t))
@@ -115,6 +119,58 @@
   (reverse-im-input-methods '("russian-computer"))
   :config
   (reverse-im-mode t))
+
+;; =============================================================================
+;; 3.1. EVIL-MODE (VIM-РЕЖИМ И РУССКАЯ РАСКЛАДКА)
+;; =============================================================================
+(use-package evil
+  :init
+  (setq evil-want-integration t
+        evil-want-keybinding nil
+        evil-want-C-u-scroll t
+        evil-want-C-i-jump nil)
+  :config
+  ;; Включаем Evil глобально
+  (evil-mode 1)
+
+  ;; 1. Ctrl+C для выхода в Normal mode из Insert, Replace и Visual
+  (define-key evil-insert-state-map (kbd "C-c") 'evil-normal-state)
+  (define-key evil-replace-state-map (kbd "C-c") 'evil-normal-state)
+  (define-key evil-visual-state-map (kbd "C-c") 'evil-normal-state)
+
+  ;; Примечание: В normal mode C-c не переопределен в evil-normal-state-map,
+  ;; поэтому он свободно используется для команд Emacs (C-c c, C-c s p и др.).
+
+  ;; 2. Поддержка русской раскладки для всех Vim-movements и команд Evil
+  ;; Транслируем русские клавиши в латинские во всех состояниях кроме ввода текста (insert и emacs)
+  (let ((translations
+         '(("й" . "q") ("ц" . "w") ("у" . "e") ("к" . "r") ("е" . "t")
+           ("н" . "y") ("г" . "u") ("ш" . "i") ("щ" . "o") ("з" . "p")
+           ("х" . "[") ("ъ" . "]") ("ф" . "a") ("ы" . "s") ("в" . "d")
+           ("а" . "f") ("п" . "g") ("р" . "h") ("о" . "j") ("л" . "k")
+           ("д" . "l") ("ж" . ";") ("э" . "'") ("я" . "z") ("ч" . "x")
+           ("с" . "c") ("м" . "v") ("и" . "b") ("т" . "n") ("ь" . "m")
+           ("б" . ",") ("ю" . ".") ("ё" . "`")
+           ("Й" . "Q") ("Ц" . "W") ("У" . "E") ("К" . "R") ("Е" . "T")
+           ("Н" . "Y") ("Г" . "U") ("Ш" . "I") ("Щ" . "O") ("З" . "P")
+           ("Х" . "{") ("Ъ" . "}") ("Ф" . "A") ("Ы" . "S") ("В" . "D")
+           ("А" . "F") ("П" . "G") ("Р" . "H") ("О" . "J") ("Л" . "K")
+           ("Д" . "L") ("Ж" . ":") ("Э" . "\"") ("Я" . "Z") ("Ч" . "X")
+           ("С" . "C") ("М" . "V") ("И" . "B") ("Т" . "N") ("Ь" . "M")
+           ("Б" . "<") ("Ю" . ">") ("Ё" . "~")
+           ("№" . "#") (";" . "$"))))
+    (dolist (pair translations)
+      (let ((ru (car pair))
+            (en (cdr pair)))
+        (define-key key-translation-map (kbd ru)
+          (lambda (_prompt)
+            (if (and (bound-and-true-p evil-mode)
+                     (not (memq evil-state '(insert emacs))))
+                (vector (aref en 0))
+              nil))))))
+
+  ;; Быстрое включение/отключение Evil глобально по C-c z
+  (global-set-key (kbd "C-c z") 'evil-mode))
 
 ;; Удобная навигация по параграфам/пустым строкам (без конфликтов с Alt+Shift)
 (global-set-key (kbd "C-<up>")   'backward-paragraph)
@@ -228,7 +284,7 @@
 (use-package cc-mode
   :ensure nil
   :config
-  (setq-default c-basic-offset 4)
+  (setq-default c-basic-offset 2)
   (setq c-default-style "linux"))
 
 ;; --- ASM (MASM) ---
@@ -252,7 +308,12 @@
 (use-package markdown-mode
   :mode ("\\.\\(?:md\\|markdown\\)\\'" . markdown-mode)
   :custom
-  (markdown-header-scaling t))
+  (markdown-header-scaling nil)        ; Отключаем увеличение шрифта заголовков (текст не скачет)
+  (markdown-indent-on-enter nil)        ; Отключаем автопродолжение заголовков и списков по Enter
+  :hook
+  (markdown-mode . (lambda ()
+                     ;; Отключаем автоформатирование и отступы при вводе
+                     (electric-indent-local-mode -1))))
 
 ;; --- LaTeX (AUCTeX) ---
 (use-package tex
@@ -306,3 +367,15 @@
 
 (provide 'init)
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
